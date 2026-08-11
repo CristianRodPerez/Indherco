@@ -1,0 +1,41 @@
+# Credenciales y configuracion privada
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# Dependencias y archivos compilados
+backend/target/
+frontend/dist/
+frontend/node_modules/
+.pnpm-store/
+
+# Configuracion local de herramientas
+.agents/
+.vscode/
+.idea/
+
+# Logs, respaldos y archivos temporales
+*.log
+backups/
+tmp/
+temp/
+*.tmp
+
+# Scripts locales que pueden contener credenciales
+run-backend-dev.ps1
+
+# Despliegue y utilidades MySQL anteriores
+deployment/
+scripts/backup-mysql.ps1
+scripts/restore-mysql.ps1
+scripts/reset-dev-database.ps1
+backend/sql/mysql-integer-quantities.sql
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini

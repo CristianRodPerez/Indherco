@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: indherco-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: indherco-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: indherco-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: indherco-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: JAVA_OPTS
+        value: -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError
+
+databases:
+  - name: indherco-db
+    plan: free
+    region: oregon
+    databaseName: indherco
+    user: indherco_app
+    postgresMajorVersion: "16"
+    ipAllowList: []

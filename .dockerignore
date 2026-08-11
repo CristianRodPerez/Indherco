@@ -1,0 +1,9 @@
+.git
+.github
+.agents
+.pnpm-store
+.vscode
+frontend/node_modules
+frontend/dist
+backend/target
+*.log

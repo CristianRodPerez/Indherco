@@ -1,0 +1,17 @@
+package com.indherco.postes.shared.enums;
+
+public enum Permission {
+    PRODUCCION_CREAR,
+    PRODUCCION_VER,
+    DESPACHO_CREAR,
+    DESPACHO_VER,
+    DESPACHO_ANULAR,
+    CONSUMO_CREAR,
+    CONSUMO_VER,
+    CIERRE_DIARIO,
+    CIERRE_REABRIR,
+    REPORTES_VER,
+    USUARIOS_ADMINISTRAR,
+    INVENTARIO_AJUSTAR,
+    AUDITORIA_VER
+}
