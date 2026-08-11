@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  build: {
+    // Evita el conflicto de enrutamiento que Render presenta con /assets.
+    assetsDir: 'static'
+  },
   plugins: [
     react(),
     VitePWA({
