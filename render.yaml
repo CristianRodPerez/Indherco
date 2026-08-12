@@ -8,6 +8,8 @@ services:
     dockerfilePath: ./Dockerfile
     healthCheckPath: /actuator/health
     envVars:
+      - key: TZ
+        value: America/Santiago
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: DATABASE_URL

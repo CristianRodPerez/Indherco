@@ -5,7 +5,8 @@ import type { DailyClosing } from '../../api/types';
 import { getStoredUser, getToken } from '../../auth/authStorage';
 import { AppShell } from '../../layouts/AppShell';
 
-const today = new Date().toISOString().slice(0, 10);
+const now = new Date();
+const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
 export function DailyClosingsPage() {
   const navigate = useNavigate();

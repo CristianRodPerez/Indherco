@@ -226,8 +226,7 @@ function formatDate(value: string) {
 }
 
 function formatTime(value: string) {
-  return new Date(value).toLocaleString('es-CL', {
-    dateStyle: 'short',
+  return new Date(value).toLocaleTimeString('es-CL', {
     timeStyle: 'short'
   });
 }

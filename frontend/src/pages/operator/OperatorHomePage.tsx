@@ -86,13 +86,13 @@ export function OperatorHomePage() {
   return (
     <AppShell title="Inicio operador" subtitle={user ? `Hola, ${user.name}` : 'Acciones disponibles'}>
       <section className="action-grid">
-        {user?.canRegisterProduction && <button className="action-button action-button--primary" onClick={() => setActiveForm('production')}><span>+</span> Registrar produccion</button>}
-        {user?.canRegisterDispatch && <button className="action-button action-button--secondary" onClick={() => setActiveForm('dispatch')}><span>-</span> Registrar despacho</button>}
-        {user?.canRegisterConsumption && <button className="action-button action-button--secondary" onClick={() => setActiveForm('consumption')}><span>-</span> Registrar consumo</button>}
+        {user?.canRegisterProduction && <button className="action-button operator-action operator-action--production" onClick={() => setActiveForm('production')}><span>+</span> Registrar produccion</button>}
+        {user?.canRegisterDispatch && <button className="action-button operator-action operator-action--dispatch" onClick={() => setActiveForm('dispatch')}><span>-</span> Registrar despacho</button>}
+        {user?.canRegisterConsumption && <button className="action-button operator-action operator-action--consumption" onClick={() => setActiveForm('consumption')}><span>-</span> Registrar consumo</button>}
       </section>
 
       {activeForm && (
-        <section className="office-section">
+        <section className={`office-section operator-form operator-form--${activeForm}`}>
           <h2>{formTitle}</h2>
           <form className="form compact-form" onSubmit={submitMovement}>
             {activeForm === 'consumption' ? (

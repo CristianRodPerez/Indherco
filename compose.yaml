@@ -20,6 +20,7 @@ services:
     build:
       context: ./backend
     environment:
+      TZ: America/Santiago
       SPRING_PROFILES_ACTIVE: prod
       DATABASE_URL: postgresql://indherco_app:${POSTGRES_PASSWORD:-indherco_local_change_me}@postgres:5432/indherco
       DB_USERNAME: indherco_app
