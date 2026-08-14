@@ -385,22 +385,22 @@ h2 {
   color: var(--color-marca-nav);
 }
 
-.operator-form--production {
+.office-section.operator-form--production {
   background: #fff8f8;
   border-color: #fecdd3;
 }
 
-.operator-form--dispatch {
+.office-section.operator-form--dispatch {
   background: #f7fef9;
   border-color: #bbf7d0;
 }
 
-.operator-form--consumption {
+.office-section.operator-form--consumption {
   background: #fffdf5;
   border-color: #fde68a;
 }
 
-.operator-form--supply-receipt {
+.office-section.operator-form--supply-receipt {
   background: #f5f9ff;
   border-color: #bfdbfe;
 }
