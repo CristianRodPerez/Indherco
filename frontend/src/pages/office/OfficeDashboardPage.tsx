@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '../../api/httpClient';
-import type { Dashboard } from '../../api/types';
+import type { Dashboard, Movement } from '../../api/types';
 import { getStoredUser, getToken } from '../../auth/authStorage';
 import { AppShell } from '../../layouts/AppShell';
 
@@ -12,6 +12,9 @@ export function OfficeDashboardPage() {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [receiptSupplyId, setReceiptSupplyId] = useState('');
+  const [receiptQuantity, setReceiptQuantity] = useState('');
+  const [receiptObservation, setReceiptObservation] = useState('');
 
   useEffect(() => {
     if (!token || !user) {
@@ -56,6 +59,26 @@ export function OfficeDashboardPage() {
     }
   }
 
+  async function registerSupplyReceipt(event: FormEvent) {
+    event.preventDefault();
+    if (!token) return;
+    setError('');
+    setMessage('');
+    try {
+      await apiPost<Movement>('/movements/supply-receipt', {
+        supplyId: Number(receiptSupplyId),
+        quantity: Number(receiptQuantity),
+        observation: receiptObservation
+      }, token);
+      setReceiptQuantity('');
+      setReceiptObservation('');
+      setDashboard(await apiGet<Dashboard>('/dashboard/today', token));
+      setMessage('Entrada de insumos registrada correctamente.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo registrar la entrada de insumos.');
+    }
+  }
+
   return (
     <AppShell title="Inicio oficina" subtitle="Resumen para control de produccion y stock.">
       {message && <p className="success-message">{message}</p>}
@@ -93,6 +116,23 @@ export function OfficeDashboardPage() {
             <strong>{metric.value}</strong>
           </article>
         ))}
+      </section>
+
+      <section className="office-section operator-form operator-form--supply-receipt">
+        <h2>Ingresar stock recibido</h2>
+        <p className="muted">Registra los insumos que llegan para aumentar el stock y conservar la trazabilidad.</p>
+        <form className="form compact-form" onSubmit={registerSupplyReceipt}>
+          <label>
+            Insumo
+            <select value={receiptSupplyId} onChange={(event) => setReceiptSupplyId(event.target.value)} required>
+              <option value="">Seleccione</option>
+              {dashboard?.suppliesStock.map((supply) => <option key={supply.id} value={supply.id}>{supply.name} ({supply.currentStock} {supply.unitOfMeasure})</option>)}
+            </select>
+          </label>
+          <label>Cantidad recibida<input type="number" min="1" step="1" value={receiptQuantity} onChange={(event) => setReceiptQuantity(event.target.value)} required /></label>
+          <label>Observacion<input value={receiptObservation} onChange={(event) => setReceiptObservation(event.target.value)} placeholder="Proveedor, guia u otro detalle" /></label>
+          <button className="primary-button" type="submit">Registrar entrada</button>
+        </form>
       </section>
 
       <section className="split-grid">

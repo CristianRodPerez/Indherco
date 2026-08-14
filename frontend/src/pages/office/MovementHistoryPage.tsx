@@ -271,6 +271,7 @@ function labelType(type: Movement['movementType']) {
   if (type === 'PRODUCCION') return 'Produccion';
   if (type === 'DESPACHO') return 'Despacho';
   if (type === 'CONSUMO') return 'Consumo';
+  if (type === 'ENTRADA_INSUMO') return 'Entrada insumo';
   return 'Anulacion';
 }
 

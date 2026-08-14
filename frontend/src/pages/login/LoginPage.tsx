@@ -9,6 +9,7 @@ export function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [keepSignedIn, setKeepSignedIn] = useState(false);
+  const [fieldsLocked, setFieldsLocked] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -37,11 +38,11 @@ export function LoginPage() {
         <form className="form" onSubmit={handleSubmit} autoComplete="off">
           <label>
             Usuario
-            <input value={username} onChange={(event) => setUsername(event.target.value)} type="text" placeholder="Ingrese su usuario" autoComplete="username" />
+            <input name="indherco-login-user" value={username} onChange={(event) => setUsername(event.target.value)} onFocus={() => setFieldsLocked(false)} readOnly={fieldsLocked} type="text" autoComplete="off" />
           </label>
           <label>
             Contraseña
-            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" placeholder="Ingrese su contraseña" autoComplete="current-password" />
+            <input name="indherco-login-password" value={password} onChange={(event) => setPassword(event.target.value)} onFocus={() => setFieldsLocked(false)} readOnly={fieldsLocked} type="password" autoComplete="new-password" />
           </label>
           <label className="remember-session">
             <input

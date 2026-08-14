@@ -18,6 +18,7 @@ import com.indherco.postes.stockmovements.dto.ConsumptionRequest;
 import com.indherco.postes.stockmovements.dto.DispatchRequest;
 import com.indherco.postes.stockmovements.dto.MovementResponse;
 import com.indherco.postes.stockmovements.dto.ProductionRequest;
+import com.indherco.postes.stockmovements.dto.SupplyReceiptRequest;
 import com.indherco.postes.supplies.Supply;
 import com.indherco.postes.supplies.SupplyRepository;
 import com.indherco.postes.users.User;
@@ -169,6 +170,33 @@ public class StockMovementService {
         return response;
     }
 
+    @Transactional
+    public MovementResponse registerSupplyReceipt(SupplyReceiptRequest request) {
+        User user = currentUserService.getCurrentUser();
+        boolean officeUser = user.getBaseRole() == com.indherco.postes.shared.enums.BaseRole.ADMIN_OFICINA
+            || user.getBaseRole() == com.indherco.postes.shared.enums.BaseRole.OFICINA;
+        if (!officeUser && !user.isCanRegisterConsumption()) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Este usuario no puede registrar entradas de insumos.");
+        }
+
+        Supply supply = supplyRepository.findByIdForUpdate(request.supplyId())
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Insumo no encontrado."));
+        ensureActive(supply.isActive(), "Insumo inactivo.");
+
+        Integer previous = supply.getCurrentStock();
+        Integer next = previous + request.quantity();
+        supply.setCurrentStock(next);
+
+        StockMovement movement = baseMovement(user, MovementType.ENTRADA_INSUMO, EntityType.INSUMO, request.quantity(), previous, next);
+        movement.setSupply(supply);
+        movement.setUnitOfMeasure(supply.getUnitOfMeasure());
+        movement.setMovementDate(LocalDate.now());
+        movement.setObservation(request.observation());
+        StockMovement saved = movementRepository.save(movement);
+        auditService.record("MOVIMIENTOS", "CREATE_SUPPLY_RECEIPT", "StockMovement", saved.getId(), null, auditDetail(saved), null);
+        return movementMapper.toResponse(saved);
+    }
+
     @Transactional(readOnly = true)
     public List<MovementResponse> findAll(LocalDate from, LocalDate to) {
         LocalDate start = from == null ? LocalDate.now().minusMonths(1) : from;
@@ -255,7 +283,12 @@ public class StockMovementService {
         Supply supply = supplyRepository.findByIdForUpdate(original.getSupply().getId())
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Insumo no encontrado."));
         Integer previous = supply.getCurrentStock();
-        Integer next = previous + original.getQuantity();
+        Integer next = original.getMovementType() == MovementType.ENTRADA_INSUMO
+            ? previous - original.getQuantity()
+            : previous + original.getQuantity();
+        if (next < 0) {
+            throw new ApiException(HttpStatus.CONFLICT, "STOCK_INSUFICIENTE", "No hay stock suficiente para anular esta entrada de insumos.");
+        }
         supply.setCurrentStock(next);
         StockMovement reversal = baseMovement(user, MovementType.ANULACION, EntityType.INSUMO, original.getQuantity(), previous, next);
         reversal.setSupply(supply);

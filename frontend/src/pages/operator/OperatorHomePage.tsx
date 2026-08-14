@@ -14,7 +14,8 @@ export function OperatorHomePage() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [activeForm, setActiveForm] = useState<'production' | 'dispatch' | 'consumption' | null>(null);
+  const [activeForm, setActiveForm] = useState<'production' | 'dispatch' | 'consumption' | 'supply-receipt' | null>(null);
+  const [pendingConfirmation, setPendingConfirmation] = useState(false);
   const [productId, setProductId] = useState('');
   const [supplyId, setSupplyId] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -41,11 +42,21 @@ export function OperatorHomePage() {
     if (activeForm === 'production') return 'Registrar produccion';
     if (activeForm === 'dispatch') return 'Registrar despacho';
     if (activeForm === 'consumption') return 'Registrar consumo';
+    if (activeForm === 'supply-receipt') return 'Registrar llegada de insumos';
     return '';
   }, [activeForm]);
 
   async function submitMovement(event: FormEvent) {
     event.preventDefault();
+    if (!activeForm || !token) return;
+    if ((activeForm === 'dispatch' || activeForm === 'consumption') && !pendingConfirmation) {
+      setPendingConfirmation(true);
+      return;
+    }
+    await saveMovement();
+  }
+
+  async function saveMovement() {
     if (!activeForm || !token) return;
     setMessage('');
     setError('');
@@ -54,15 +65,18 @@ export function OperatorHomePage() {
       ? '/movements/production'
       : activeForm === 'dispatch'
         ? '/movements/dispatch'
-        : '/movements/consumption';
+        : activeForm === 'consumption'
+          ? '/movements/consumption'
+          : '/movements/supply-receipt';
 
     const parsedQuantity = parseInt(quantity, 10);
-    const body = activeForm === 'consumption'
+    const body = activeForm === 'consumption' || activeForm === 'supply-receipt'
       ? { supplyId: Number(supplyId), quantity: parsedQuantity, observation }
       : { productId: Number(productId), quantity: parsedQuantity, observation };
 
     try {
       await apiPost<Movement>(path, body, token);
+      setPendingConfirmation(false);
       setMessage('Registro guardado correctamente.');
       setQuantity('');
       setObservation('');
@@ -86,16 +100,17 @@ export function OperatorHomePage() {
   return (
     <AppShell title="Inicio operador" subtitle={user ? `Hola, ${user.name}` : 'Acciones disponibles'}>
       <section className="action-grid">
-        {user?.canRegisterProduction && <button className="action-button operator-action operator-action--production" onClick={() => setActiveForm('production')}><span>+</span> Registrar produccion</button>}
-        {user?.canRegisterDispatch && <button className="action-button operator-action operator-action--dispatch" onClick={() => setActiveForm('dispatch')}><span>-</span> Registrar despacho</button>}
-        {user?.canRegisterConsumption && <button className="action-button operator-action operator-action--consumption" onClick={() => setActiveForm('consumption')}><span>-</span> Registrar consumo</button>}
+        {user?.canRegisterProduction && <button className="action-button action-button--primary" onClick={() => setActiveForm('production')}><span>+</span> Registrar produccion</button>}
+        {user?.canRegisterDispatch && <button className="action-button action-button--secondary" onClick={() => setActiveForm('dispatch')}><span>-</span> Registrar despacho</button>}
+        {user?.canRegisterConsumption && <button className="action-button action-button--secondary" onClick={() => setActiveForm('consumption')}><span>-</span> Registrar consumo</button>}
+        {user?.canRegisterConsumption && <button className="action-button action-button--secondary" onClick={() => setActiveForm('supply-receipt')}><span>+</span> Ingresar stock recibido</button>}
       </section>
 
       {activeForm && (
         <section className={`office-section operator-form operator-form--${activeForm}`}>
           <h2>{formTitle}</h2>
           <form className="form compact-form" onSubmit={submitMovement}>
-            {activeForm === 'consumption' ? (
+            {activeForm === 'consumption' || activeForm === 'supply-receipt' ? (
               <label>
                 Insumo
                 <select value={supplyId} onChange={(event) => setSupplyId(event.target.value)} required>
@@ -125,6 +140,24 @@ export function OperatorHomePage() {
             <button className="primary-button" type="submit">Guardar</button>
           </form>
         </section>
+      )}
+
+      {pendingConfirmation && activeForm && (
+        <div className="confirmation-overlay" role="presentation">
+          <section className="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmation-title">
+            <h2 id="confirmation-title">Confirmar {activeForm === 'dispatch' ? 'despacho' : 'consumo'}</h2>
+            <p>Revisa los datos antes de guardar el registro:</p>
+            <dl className="confirmation-summary">
+              <div><dt>{activeForm === 'dispatch' ? 'Producto' : 'Insumo'}</dt><dd>{activeForm === 'dispatch' ? products.find((item) => item.id === Number(productId))?.name : supplies.find((item) => item.id === Number(supplyId))?.name}</dd></div>
+              <div><dt>Cantidad</dt><dd>{quantity}</dd></div>
+              <div><dt>Observacion</dt><dd>{observation || 'Sin observacion'}</dd></div>
+            </dl>
+            <div className="confirmation-actions">
+              <button className="action-button action-button--secondary" type="button" onClick={() => setPendingConfirmation(false)}>Volver y editar</button>
+              <button className="primary-button" type="button" onClick={saveMovement}>Confirmar registro</button>
+            </div>
+          </section>
+        </div>
       )}
 
       <section className="office-section">

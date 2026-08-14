@@ -20,7 +20,7 @@ export type Supply = {
 
 export type Movement = {
   id: number;
-  movementType: 'PRODUCCION' | 'DESPACHO' | 'CONSUMO' | 'ANULACION';
+  movementType: 'PRODUCCION' | 'DESPACHO' | 'CONSUMO' | 'ENTRADA_INSUMO' | 'ANULACION';
   entityType: 'PRODUCTO' | 'INSUMO';
   itemName: string;
   quantity: number;

@@ -5,6 +5,7 @@ import com.indherco.postes.stockmovements.dto.ConsumptionRequest;
 import com.indherco.postes.stockmovements.dto.DispatchRequest;
 import com.indherco.postes.stockmovements.dto.MovementResponse;
 import com.indherco.postes.stockmovements.dto.ProductionRequest;
+import com.indherco.postes.stockmovements.dto.SupplyReceiptRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,6 +45,12 @@ public class StockMovementController {
     @PreAuthorize("hasAuthority('CONSUMO_CREAR')")
     public MovementResponse consumption(@Valid @RequestBody ConsumptionRequest request) {
         return movementService.registerConsumption(request);
+    }
+
+    @PostMapping("/supply-receipt")
+    @PreAuthorize("hasAnyRole('ADMIN_OFICINA', 'OFICINA') or hasAuthority('CONSUMO_CREAR')")
+    public MovementResponse supplyReceipt(@Valid @RequestBody SupplyReceiptRequest request) {
+        return movementService.registerSupplyReceipt(request);
     }
 
     @GetMapping

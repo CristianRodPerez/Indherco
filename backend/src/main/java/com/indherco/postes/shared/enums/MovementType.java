@@ -4,5 +4,6 @@ public enum MovementType {
     PRODUCCION,
     DESPACHO,
     CONSUMO,
+    ENTRADA_INSUMO,
     ANULACION
 }
